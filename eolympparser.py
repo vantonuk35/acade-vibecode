@@ -51,8 +51,6 @@ def extract_problem_data_from_script(url: str) -> dict:
     array_data = json.loads(json_array_text)
     return extract_problem_json_from_nested_string(array_data)
 
-# ---------- ECM to HTML -----------
-
 def render_ecm_to_html(children) -> dict:
     sections = {
         "legend": "",
@@ -138,8 +136,6 @@ def fetch_url_text(url):
     except:
         return ""
 
-# ---------- Main parse function -----------
-
 def parse_full_problem(problem_data: dict) -> dict:
     content = problem_data["statement"]["content"]["render"]["children"]
     rendered = render_ecm_to_html(content)
@@ -172,9 +168,6 @@ def parse_full_problem(problem_data: dict) -> dict:
         "Выходные данные": rendered["output"].strip(),
         "Примечание": rendered["note"].strip()
     }
-
-# ---------- CLI / Test run -----------
-
 if __name__ == "__main__":
     url = "https://basecamp.eolymp.com/ru/problems/265"
     problem_data = extract_problem_data_from_script(url)
