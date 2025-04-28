@@ -51,6 +51,8 @@ def extract_problem_data_from_script(url: str) -> dict:
     array_data = json.loads(json_array_text)
     return extract_problem_json_from_nested_string(array_data)
 
+# ---------- ECM to HTML -----------
+
 def render_ecm_to_html(children) -> dict:
     sections = {
         "legend": "",
@@ -92,7 +94,7 @@ def render_node(node):
     elif t == "ul":
         items = ''.join(f"<li>{render_inline_children(item.get('children', []))}</li>" for item in node.get("children", []))
         return f"<ul>{items}</ul>\n"
-    elif t == "ol":
+    elif t == "ol" or t == "list":
         items = ''.join(f"<li>{render_inline_children(item.get('children', []))}</li>" for item in node.get("children", []))
         return f"<ol>{items}</ol>\n"
     elif t == "problem-attachments":
@@ -117,9 +119,12 @@ def render_inline_children(children):
         attr = child.get("attr", {})
         text = attr.get("text", "")
         style = attr.get("style", "")
-
+        if t == "p":
+            result += render_inline_children(child.get('children', [])) + "\n\n"
         if t == "inline-math":
             result += f"\\({attr['exp']}\\)"
+        if t == "inline-code":
+            result += f"<code>{attr['source']}</code>"
         elif style == "bold":
             result += f"<b>{text}</b>"
         elif style == "italic":
@@ -135,6 +140,8 @@ def fetch_url_text(url):
         return r.text.strip()
     except:
         return ""
+
+# ---------- Main parse function -----------
 
 def parse_full_problem(problem_data: dict) -> dict:
     content = problem_data["statement"]["content"]["render"]["children"]
@@ -168,8 +175,11 @@ def parse_full_problem(problem_data: dict) -> dict:
         "Выходные данные": rendered["output"].strip(),
         "Примечание": rendered["note"].strip()
     }
+
+# ---------- CLI / Test run -----------
+
 if __name__ == "__main__":
-    url = "https://basecamp.eolymp.com/ru/problems/265"
+    url = "https://basecamp.eolymp.com/ru/problems/8434"
     problem_data = extract_problem_data_from_script(url)
     parsed = parse_full_problem(problem_data)
 
